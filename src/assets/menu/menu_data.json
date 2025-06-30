@@ -1,0 +1,91 @@
+{
+  "menuItems": [
+    {
+      "title": "adhyatmachutuke_16_The story of Raama_Part 1",
+      "filePath": "pages/adhyatmachutuke_16_The story of Raama_Part 1.md"
+    },
+    {
+      "title": "adhyatmachutuke_17_The story of Raama_Part 2",
+      "filePath": "pages/adhyatmachutuke_17_The story of Raama_Part 2.md"
+    },
+    {
+      "title": "adhyatmachutuke_49_Raamayana",
+      "filePath": "pages/adhyatmachutuke_49_Raamayana.md"
+    },
+    {
+      "title": "adhyatmachutuke_50_Narada Maharishi",
+      "filePath": "pages/adhyatmachutuke_50_Narada Maharishi.md"
+    },
+    {
+      "title": "adhyatmachutuke_51_Vasishta",
+      "filePath": "pages/adhyatmachutuke_51_Vasishta.md"
+    },
+    {
+      "title": "adhyatmachutuke_52_Rishyashringa",
+      "filePath": "pages/adhyatmachutuke_52_Rishyashringa.md"
+    },
+    {
+      "title": "adhyatmachutuke_53_Dasharatha",
+      "filePath": "pages/adhyatmachutuke_53_Dasharatha.md"
+    },
+    {
+      "title": "adhyatmachutuke_54_Janaka",
+      "filePath": "pages/adhyatmachutuke_54_Janaka.md"
+    },
+    {
+      "title": "adhyatmachutuke_55_Ahalya",
+      "filePath": "pages/adhyatmachutuke_55_Ahalya.md"
+    },
+    {
+      "title": "adhyatmachutuke_56_Shabari, Matanga, Dundubhi",
+      "filePath": "pages/adhyatmachutuke_56_Shabari, Matanga, Dundubhi.md"
+    },
+    {
+      "title": "adhyatmachutuke_57_Jatayu and Sampati",
+      "filePath": "pages/adhyatmachutuke_57_Jatayu and Sampati.md"
+    },
+    {
+      "title": "adhyatmachutuke_58_The Queens of Ayodhya",
+      "filePath": "pages/adhyatmachutuke_58_The Queens of Ayodhya.md"
+    },
+    {
+      "title": "adhyatmachutuke_59_Kumbhakarna",
+      "filePath": "pages/adhyatmachutuke_59_Kumbhakarna.md"
+    },
+    {
+      "title": "adhyatmachutuke_60_Manthara",
+      "filePath": "pages/adhyatmachutuke_60_Manthara.md"
+    },
+    {
+      "title": "adhyatmachutuke_61_Shravana Kumara",
+      "filePath": "pages/adhyatmachutuke_61_Shravana Kumara.md"
+    },
+    {
+      "title": "adhyatmachutuke_62_Bharatha and Shatrughna",
+      "filePath": "pages/adhyatmachutuke_62_Bharatha and Shatrughna.md"
+    },
+    {
+      "title": "Markdown Syntax Reference",
+      "filePath": "pages/markdown_syntax_reference.md"
+    },
+    {
+      "title": "Submenu Example",
+      "children": [
+        {
+          "title": "Menu 1",
+          "filePath": "markdowns/dimensions/customer.md"
+        },
+        { "title": "Menu 2",
+          "filePath": "markdowns/dimensions/install.md"
+        },
+        { "title": "Menu 3",
+          "filePath": "markdowns/dimensions/product.md"
+        },
+        { "title": "Menu 4",
+          "filePath": "markdowns/dimensions/usage.md"
+        }
+      ]
+    }
+    
+  ]
+}
