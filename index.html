@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Markdown Docs Viewer</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Marked.js CDN for Markdown parsing -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.0.0/marked.min.js"></script>
+    <style>
+        /* Custom styles for better readability and appearance */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6; /* Light gray background */
+            display: flex;
+            flex-direction: column; /* Stack vertically on small screens */
+            min-height: 100vh;
+        }
+
+        /* Responsive layout for large screens */
+        @media (min-width: 1024px) {
+            body {
+                flex-direction: row; /* Side-by-side on large screens */
+            }
+        }
+
+        .sidebar {
+            width: 100%; /* Full width on small screens */
+            max-width: 100%;
+            background-color: #f8fafc; /* Lighter background for sidebar */
+            padding: 1.5rem;
+            border-bottom: 1px solid #e2e8f0; /* Separator on small screens */
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05); /* Subtle shadow */
+            border-radius: 0 0 12px 12px; /* Rounded bottom corners on mobile */
+        }
+
+        @media (min-width: 1024px) {
+            .sidebar {
+                width: 280px; /* Fixed width on large screens */
+                min-width: 280px; /* Ensure it doesn't shrink */
+                height: 100vh; /* Full height on large screens */
+                border-right: 1px solid #e2e8f0; /* Separator on large screens */
+                border-bottom: none;
+                border-radius: 0 12px 12px 0; /* Rounded right corners on desktop */
+                overflow-y: auto; /* Enable scrolling for long content lists */
+            }
+        }
+
+        .main-content {
+            flex-grow: 1; /* Take remaining space */
+            padding: 2rem;
+            background-color: #f3f4f6;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto; /* Enable scrolling for main content */
+        }
+
+        .markdown-content {
+            padding: 1.5rem;
+            background-color: #ffffff;
+            border-radius: 12px; /* More rounded corners */
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1); /* Softer shadow */
+            border: 1px solid #e5e7eb;
+            line-height: 1.6; /* Improved line spacing */
+            color: #374151; /* Darker text color */
+            overflow-x: auto; /* Scroll for wide content like tables/code */
+        }
+        .markdown-content h1, .markdown-content h2, .markdown-content h3 {
+            color: #1f2937; /* Darker headings */
+            margin-top: 1.5em;
+            margin-bottom: 0.5em;
+            border-bottom: 1px solid #e5e7eb; /* Subtle line under headings */
+            padding-bottom: 0.3em;
+        }
+        .markdown-content p {
+            margin-bottom: 1em;
+        }
+        .markdown-content pre {
+            background-color: #1f2937; /* Dark background for code blocks */
+            color: #e5e7eb;
+            padding: 1em;
+            border-radius: 6px;
+            overflow-x: auto; /* Scroll for long code lines */
+        }
+        .markdown-content code {
+            font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
+            background-color: #e2e8f0; /* Light background for inline code */
+            color: #c026d3; /* Purple color for inline code */
+            padding: 0.2em 0.4em;
+            border-radius: 4px;
+        }
+        .markdown-content blockquote {
+            border-left: 4px solid #9ca3af; /* Gray border for blockquotes */
+            color: #6b7280;
+            padding-left: 1em;
+            margin-left: 0;
+            font-style: italic;
+        }
+        .markdown-content ul, .markdown-content ol {
+            margin-left: 1.5em;
+            margin-bottom: 1em;
+        }
+        .markdown-content li {
+            margin-bottom: 0.5em;
+        }
+        .markdown-content a {
+            color: #3b82f6; /* Blue links */
+            text-decoration: none;
+        }
+        .markdown-content a:hover {
+            text-decoration: underline;
+        }
+
+        /* Sidebar list item styling */
+        .sidebar ul li {
+            padding: 0.75rem 1rem;
+            cursor: pointer;
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+            transition: background-color 0.2s ease, color 0.2s ease;
+            font-weight: 500;
+            color: #4b5563; /* Default text color */
+        }
+
+        .sidebar ul li:hover {
+            background-color: #e0f2fe; /* Light blue on hover */
+            color: #1d4ed8; /* Darker blue text on hover */
+        }
+
+        .sidebar ul li.active {
+            background-color: #bfdbfe; /* Stronger blue for active item */
+            color: #1e40af; /* Even darker blue text for active */
+            font-weight: 600;
+        }
+
+        .sidebar .folder-item {
+            font-weight: 600;
+            color: #334155;
+            cursor: pointer;
+            padding: 0.75rem 1rem;
+            margin-bottom: 0.5rem;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background-color: #e2e8f0; /* Light gray for folders */
+        }
+
+        .sidebar .folder-item:hover {
+            background-color: #cbd5e1;
+        }
+
+        .sidebar .folder-content {
+            display: none; /* Hidden by default */
+            padding-left: 1rem;
+            border-left: 2px solid #cbd5e1; /* Indentation line */
+            margin-left: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .sidebar .folder-content.expanded {
+            display: block; /* Shown when expanded */
+        }
+
+        .arrow-icon {
+            transition: transform 0.2s ease;
+        }
+
+        .arrow-icon.rotate {
+            transform: rotate(90deg);
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <!-- Left Sidebar -->
+    <div class="sidebar">
+        <h2 class="text-2xl font-bold text-gray-900 mb-6 text-center">
+            Markdown Docs
+        </h2>
+
+        <div id="dynamicMenu" class="space-y-1">
+            <!-- Menu items will be injected here by JavaScript -->
+        </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="main-content">
+        <h1 class="text-3xl font-extrabold text-gray-900 mb-6 text-center lg:text-left">
+            Markdown Document Viewer
+        </h1>
+
+        <div class="markdown-content mt-4 md:mt-8 p-6 shadow-md flex-grow">
+            <div id="renderedMarkdown" class="prose max-w-none">
+                <p class="text-gray-600">Please select a document from the left sidebar to see its content here.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const renderedMarkdownDiv = document.getElementById('renderedMarkdown');
+            const dynamicMenu = document.getElementById('dynamicMenu');
+
+            // --- Sample Markdown Content (simulating file content) ---
+            // In a real application, you would fetch these from actual .md files
+            // using the file paths specified in menu_data.json
+            const markdownFilesContent = {
+                "markdowns/README.md": `
+# Project README
+
+This is the main README file for our project. It provides an overview of the application and how to use it.
+
+## Overview
+The project aims to simplify documentation viewing by allowing users to navigate through a structured list of Markdown files.
+
+## Getting Started
+1.  Navigate the sidebar on the left.
+2.  Click on any document title to view its content.
+3.  Expand sections to find nested documents.
+                `,
+                "markdowns/resources.md": `
+# Resources
+
+This section lists important resources for the project.
+
+## External Links
+* [GitHub Repository](https://github.com/example/repo)
+* [API Documentation](https://api.example.com/docs)
+
+## Internal Wiki
+Refer to our internal Confluence wiki for more detailed information on specific modules.
+                `,
+                "markdowns/dimensions/customer.md": `
+# Set Customer Dimension
+
+This document outlines the process for setting up customer dimensions.
+
+## Steps:
+1.  Access the Customer Data Management tool.
+2.  Import customer data from the CSV file.
+3.  Validate data integrity.
+4.  Activate the new dimension.
+
+For troubleshooting, refer to the "Troubleshooting Guide".
+                `,
+                "markdowns/dimensions/install.md": `
+# Set Install Dimension
+
+Details on configuring the installation dimension.
+
+This involves mapping installation IDs to relevant product instances. Ensure all necessary prerequisites are met before proceeding.
+                `,
+                "markdowns/dimensions/product.md": `
+# Set Product Dimension
+
+Guide to defining product dimensions.
+
+Each product must have a unique identifier and associated attributes for reporting purposes.
+                `,
+                "markdowns/dimensions/usage.md": `
+# Set Usage Dimension
+
+Instructions for tracking usage dimensions.
+
+Usage data helps in understanding user behavior and product adoption. Ensure proper logging is enabled.
+                `,
+                "markdowns/start_product_results.md": `
+# Start Product Results
+
+This process initiates the generation of product results reports.
+
+It aggregates data from various sources and compiles them into a comprehensive report. This is typically run at the end of each reporting cycle.
+                `,
+                "markdowns/update_reports.md": `
+# Update Reports
+
+Learn how to update existing reports.
+
+Reports can be updated manually or via scheduled automation. Always review the changes before finalizing.
+                `
+            };
+
+            // Function to render Markdown content
+            const renderMarkdown = (markdownText) => {
+                try {
+                    // Using async: true and highlight for better code block rendering
+                    marked.setOptions({
+                        highlight: function(code, lang) {
+                            // Simple highlight for demonstration, in a real app you'd use a library like highlight.js
+                            if (lang && markdownFilesContent[lang]) { // Basic check if language is provided
+                                return code; // For now, just return code as is.
+                            }
+                            return code;
+                        },
+                        async: false // Keep sync for immediate rendering
+                    });
+                    const htmlContent = marked.parse(markdownText);
+                    renderedMarkdownDiv.innerHTML = htmlContent;
+                } catch (error) {
+                    renderedMarkdownDiv.innerHTML = `<p class="text-red-500">Error parsing Markdown: ${error.message}</p>`;
+                    console.error("Error parsing Markdown:", error);
+                }
+            };
+
+            // Function to build the menu recursively
+            const buildMenu = (items, parentElement) => {
+                const ul = document.createElement('ul');
+                ul.className = 'space-y-1'; // Tailwind class for spacing
+
+                items.forEach(item => {
+                    if (item.children) {
+                        // Folder/Expandable item
+                        const li = document.createElement('li');
+                        const folderDiv = document.createElement('div');
+                        folderDiv.className = 'folder-item';
+                        folderDiv.innerHTML = `
+                            <span>${item.title}</span>
+                            <span class="arrow-icon">&#9658;</span> <!-- Right-pointing arrow -->
+                        `;
+                        li.appendChild(folderDiv);
+
+                        const folderContentDiv = document.createElement('div');
+                        folderContentDiv.className = 'folder-content';
+                        buildMenu(item.children, folderContentDiv); // Recursively build children
+                        li.appendChild(folderContentDiv);
+
+                        folderDiv.addEventListener('click', () => {
+                            folderContentDiv.classList.toggle('expanded');
+                            folderDiv.querySelector('.arrow-icon').classList.toggle('rotate');
+                        });
+                        ul.appendChild(li);
+                    } else {
+                        // Regular document item
+                        const li = document.createElement('li');
+                        li.textContent = item.title;
+                        li.dataset.filePath = item.filePath; // Store file path for loading
+
+                        li.addEventListener('click', () => {
+                            // Remove active class from all items
+                            document.querySelectorAll('.sidebar li').forEach(el => {
+                                el.classList.remove('active');
+                            });
+                            // Add active class to clicked item
+                            li.classList.add('active');
+
+                            // Load content
+                            const filePath = li.dataset.filePath;
+                            if (markdownFilesContent[filePath]) {
+                                renderMarkdown(markdownFilesContent[filePath]);
+                            } else {
+                                renderedMarkdownDiv.innerHTML = `<p class="text-red-500">Document not found: ${filePath}</p>`;
+                            }
+                        });
+                        ul.appendChild(li);
+                    }
+                });
+                parentElement.appendChild(ul);
+            };
+
+            // Fetch menu data and build the menu
+            try {
+                // In a real scenario, you'd fetch menu_data.json from a server:
+                // const response = await fetch('menu_data.json');
+                // const menuData = await response.json();
+
+                // For this demonstration, we use the hardcoded menu data directly:
+                const menuData = {
+                  "menuItems": [
+                    {
+                      "title": "README.md",
+                      "filePath": "markdowns/README.md"
+                    },
+                    {
+                      "title": "Midhun",
+                      "filePath": "markdowns/resources.md"
+                    },
+                    {
+                      "title": "Dimensions",
+                      "children": [
+                        {
+                          "title": "Set Customer Dimension",
+                          "filePath": "markdowns/dimensions/customer.md"
+                        },
+                        {
+                          "title": "Set Install Dimension",
+                          "filePath": "markdowns/dimensions/install.md"
+                        },
+                        {
+                          "title": "Set Product Dimension",
+                          "filePath": "markdowns/dimensions/product.md"
+                        },
+                        {
+                          "title": "Set Usage Dimension",
+                          "filePath": "markdowns/dimensions/usage.md"
+                        }
+                      ]
+                    },
+                    {
+                      "title": "Start Product Results",
+                      "filePath": "markdowns/start_product_results.md"
+                    },
+                    {
+                      "title": "Update Reports",
+                      "filePath": "markdowns/update_reports.md"
+                    }
+                  ]
+                };
+
+
+                if (menuData && menuData.menuItems) {
+                    buildMenu(menuData.menuItems, dynamicMenu);
+
+                    // Optionally, load the first item by default
+                    const firstMenuItem = dynamicMenu.querySelector('li[data-file-path]');
+                    if (firstMenuItem) {
+                        firstMenuItem.click();
+                    }
+                } else {
+                    dynamicMenu.innerHTML = `<p class="text-red-500">Error: Menu data not found or invalid.</p>`;
+                }
+
+            } catch (error) {
+                dynamicMenu.innerHTML = `<p class="text-red-500">Error loading menu data: ${error.message}</p>`;
+                console.error("Error loading menu data:", error);
+            }
+        });
+    </script>
+</body>
+</html>
